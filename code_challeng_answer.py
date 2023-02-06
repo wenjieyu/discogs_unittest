@@ -1,6 +1,5 @@
 import requests
 import unittest
-from jsonpath_ng import jsonpath, parse
 
 class TestDiscogs(unittest.TestCase):
     # valid key
@@ -42,32 +41,29 @@ class TestDiscogs(unittest.TestCase):
             }
 
     def test_basic_response(self):
-        res = requests.get("{}/search".format(self.discog_url),headers=self.headers)
- 
-        print(res.request)
-        print(res.json())
+         res = requests.get("{}/search".format(self.discog_url),headers=self.headers)
+         print(res.request)
+         print(res.json())
     
-        if res.status_code==200:
-            access = True
-        else:
+         if res.status_code==200:
+             access = True
+         else:
             access = False    
-        res = res.json()
-        jsonpath_expression = parse("$.pagination.per_page")
-
-        for match in jsonpath_expression.find(res):
-	         per_page_num = match.value
+         res = res.json()
+         # extract per_page from dic[]
+         per_page_num = res['pagination']['per_page']
         
-        #asserting access success
-        self.assertTrue(access)
+         #asserting access success
+         self.assertTrue(access)
 
-        #asserting default per page without limit specified
-        self.assertEqual(per_page_num,self.defaut_per_page)
+         #asserting default per page without limit specified
+         self.assertEqual(per_page_num,self.defaut_per_page)
 
        
 
     def test_basic_response_fail(self):
         res = requests.get("{}/search".format(self.discog_url),headers=self.headers_invalid)
- 
+       
         print(res.request)
         print(res.json())
     
@@ -80,33 +76,29 @@ class TestDiscogs(unittest.TestCase):
         self.assertTrue(access)   
 
     def test_pagni_response_limit_specific(self):
-        res = requests.get("{}/search".format(self.discog_url), params =self.pagni_param_specific_limit, headers=self.headers)
- 
-        print(res.request)
-        print(res.json())
-        res = res.json()
-        jsonpath_expression = parse("$.pagination.per_page")
 
-        for match in jsonpath_expression.find(res):
-	         per_page_num = match.value
-        
+         res = requests.get("{}/search".format(self.discog_url), params =self.pagni_param_specific_limit, headers=self.headers)
+         print(res.request)
+         res = res.json()
+         # extract per_page from dic[]
+         per_page_num = res['pagination']['per_page']
+                 
         #asserting per page with specific limit
 
-        self.assertEqual(per_page_num,self.specific_limit_per_page)
-    
+         self.assertEqual(per_page_num,self.specific_limit_per_page)
 
     def test_pagni_response_over_max(self):
-        res = requests.get("{}/search".format(self.discog_url), params =self.pagni_param_over_max, headers=self.headers)
+         res = requests.get("{}/search".format(self.discog_url), params =self.pagni_param_over_max, headers=self.headers)
  
-        print(res.request)
-        print(res.json())
-        res = res.json()
-        jsonpath_expression = parse("$.pagination.per_page")
-
-        for match in jsonpath_expression.find(res):
-	         per_page_num = match.value
+         print(res.request)
+         #print(res.json())
+         res = res.json()
+        
+        # extract per_page from dic[]
+         per_page_num = res['pagination']['per_page']
         #asserting max per_page with limit over max specified     
-        self.assertEqual(per_page_num,self.max_per_page)
+         self.assertEqual(per_page_num,self.max_per_page)
+        
 
 if __name__ == '__main__':
     #unittest.main()
